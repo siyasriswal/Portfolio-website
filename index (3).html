@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Siya Sriswal — AI/ML Engineer</title>
+<meta name="description" content="Siya Sriswal — AI & Data Science student building classifiers that turn noisy data into clean decisions." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --ink:#0F1115;
+    --ink-raised:#15181F;
+    --ink-line:#262B35;
+    --paper:#F7F5F0;
+    --slate:#8A8F98;
+    --slate-dim:#5A5F68;
+    --signal-real:#4D7CFF;
+    --signal-real-dim:#1E2A4D;
+    --signal-fake:#FF6B5C;
+    --signal-fake-dim:#3A211F;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--font-display);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+
+  #signal-canvas{
+    position:fixed;
+    top:0; left:0;
+    width:100vw; height:100vh;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  nav, header, section, footer{
+    position:relative;
+    z-index:1;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #signal-canvas{display:none;}
+  }
+
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--signal-real);color:var(--ink);}
+
+  :focus-visible{
+    outline:2px solid var(--signal-real);
+    outline-offset:3px;
+    border-radius:2px;
+  }
+
+  .wrap{
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed;
+    top:0; left:0; right:0;
+    z-index:100;
+    backdrop-filter:blur(10px);
+    background:rgba(15,17,21,0.72);
+    border-bottom:1px solid var(--ink-line);
+  }
+  .nav-inner{
+    max-width:1120px;
+    margin:0 auto;
+    padding:18px 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .logo{
+    font-family:var(--font-mono);
+    font-size:14px;
+    letter-spacing:0.02em;
+    color:var(--paper);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .logo .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--signal-real);
+    box-shadow:0 0 0 0 rgba(77,124,255,0.6);
+    animation:pulse 2.4s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(77,124,255,0.5);}
+    70%{box-shadow:0 0 0 6px rgba(77,124,255,0);}
+    100%{box-shadow:0 0 0 0 rgba(77,124,255,0);}
+  }
+  .nav-links{
+    display:flex;
+    gap:28px;
+    font-family:var(--font-mono);
+    font-size:13px;
+    color:var(--slate);
+  }
+  .nav-links a{transition:color 0.2s;}
+  .nav-links a:hover{color:var(--paper);}
+  .nav-links .num{color:var(--slate-dim); margin-right:4px;}
+  @media (max-width:680px){
+    .nav-links{display:none;}
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding-top:120px;
+    padding-bottom:80px;
+    position:relative;
+  }
+
+  .hero-grid{
+    position:absolute;
+    inset:0;
+    background-image:
+      linear-gradient(var(--ink-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--ink-line) 1px, transparent 1px);
+    background-size:48px 48px;
+    opacity:0.35;
+    mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,0.6) 20%, rgba(0,0,0,0.6) 80%, transparent);
+    pointer-events:none;
+  }
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:13px;
+    color:var(--signal-real);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:24px;height:1px;
+    background:var(--signal-real);
+  }
+
+  h1.title{
+    font-size:clamp(40px, 7vw, 76px);
+    font-weight:600;
+    line-height:1.04;
+    letter-spacing:-0.01em;
+    max-width:880px;
+  }
+  h1.title .accent{color:var(--signal-real);}
+
+  .hero-sub{
+    margin-top:24px;
+    max-width:560px;
+    color:var(--slate);
+    font-size:17px;
+    line-height:1.65;
+  }
+  .hero-sub strong{color:var(--paper); font-weight:500;}
+
+  .hero-cta{
+    margin-top:36px;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    font-family:var(--font-mono);
+    font-size:13px;
+    padding:13px 22px;
+    border-radius:6px;
+    transition:all 0.2s;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .btn-primary:hover{
+    background:var(--signal-real);
+    color:var(--paper);
+    transform:translateY(-1px);
+  }
+  .btn-ghost{
+    border:1px solid var(--ink-line);
+    color:var(--paper);
+  }
+  .btn-ghost:hover{
+    border-color:var(--slate);
+    background:var(--ink-raised);
+  }
+
+  /* ---------- CLASSIFIER DEMO ---------- */
+  .classifier{
+    margin-top:64px;
+    max-width:620px;
+    border:1px solid var(--ink-line);
+    border-radius:12px;
+    background:var(--ink-raised);
+    overflow:hidden;
+  }
+  .classifier-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 18px;
+    border-bottom:1px solid var(--ink-line);
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--slate);
+  }
+  .classifier-head .traffic{
+    display:flex;
+    gap:6px;
+  }
+  .traffic span{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--ink-line);
+  }
+  .classifier-body{
+    padding:20px 18px 22px;
+  }
+  .classifier-body label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--slate-dim);
+    display:block;
+    margin-bottom:8px;
+  }
+  #headline-input{
+    width:100%;
+    background:var(--ink);
+    border:1px solid var(--ink-line);
+    color:var(--paper);
+    font-family:var(--font-display);
+    font-size:15px;
+    padding:13px 14px;
+    border-radius:7px;
+    resize:none;
+    transition:border-color 0.2s;
+  }
+  #headline-input:focus{
+    border-color:var(--signal-real);
+    outline:none;
+  }
+  .classifier-result{
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .verdict{
+    font-family:var(--font-mono);
+    font-size:13px;
+    font-weight:600;
+    padding:7px 14px;
+    border-radius:20px;
+    white-space:nowrap;
+    transition:all 0.25s;
+    min-width:88px;
+    text-align:center;
+  }
+  .verdict.real{background:var(--signal-real-dim); color:var(--signal-real);}
+  .verdict.fake{background:var(--signal-fake-dim); color:var(--signal-fake);}
+  .verdict.idle{background:var(--ink-line); color:var(--slate);}
+
+  .bar-track{
+    flex:1;
+    height:8px;
+    background:var(--ink-line);
+    border-radius:4px;
+    overflow:hidden;
+    position:relative;
+  }
+  .bar-fill{
+    height:100%;
+    width:50%;
+    border-radius:4px;
+    transition:width 0.4s ease, background 0.4s ease;
+    background:var(--slate-dim);
+  }
+  .confidence-label{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--slate);
+    min-width:46px;
+    text-align:right;
+  }
+  .classifier-hint{
+    margin-top:12px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--slate-dim);
+  }
+
+  /* ---------- SECTION SHARED ---------- */
+  section{
+    padding:120px 0;
+    border-top:1px solid var(--ink-line);
+  }
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    margin-bottom:56px;
+  }
+  .section-tag{
+    font-family:var(--font-mono);
+    font-size:13px;
+    color:var(--signal-real);
+  }
+  .section-head h2{
+    font-size:clamp(28px, 4vw, 38px);
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .section-head .rule{
+    flex:1;
+    height:1px;
+    background:var(--ink-line);
+  }
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:64px;
+  }
+  @media (max-width:780px){
+    .about-grid{grid-template-columns:1fr; gap:40px;}
+  }
+  .about-text p{
+    color:var(--slate);
+    font-size:16px;
+    line-height:1.75;
+    margin-bottom:18px;
+    max-width:540px;
+  }
+  .about-text strong{color:var(--paper); font-weight:500;}
+
+  .stat-row{
+    display:flex;
+    gap:0;
+    margin-top:32px;
+    border-top:1px solid var(--ink-line);
+  }
+  .stat{
+    flex:1;
+    padding:18px 0 0;
+    border-right:1px solid var(--ink-line);
+  }
+  .stat:last-child{border-right:none;}
+  .stat .num{
+    font-family:var(--font-mono);
+    font-size:26px;
+    color:var(--paper);
+    font-weight:600;
+  }
+  .stat .label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--slate-dim);
+    margin-top:4px;
+  }
+
+  .edu-card{
+    background:var(--ink-raised);
+    border:1px solid var(--ink-line);
+    border-radius:10px;
+    padding:22px 22px;
+    margin-bottom:14px;
+  }
+  .edu-card .period{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--signal-real);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .edu-card h3{
+    font-size:17px;
+    margin-top:8px;
+    font-weight:600;
+  }
+  .edu-card .school{
+    color:var(--slate);
+    font-size:14px;
+    margin-top:4px;
+  }
+  .edu-card .score{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--slate-dim);
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid var(--ink-line);
+  }
+
+  /* ---------- SKILLS ---------- */
+  .skills-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--ink-line);
+    border:1px solid var(--ink-line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  @media (max-width:780px){
+    .skills-grid{grid-template-columns:1fr;}
+  }
+  .skill-cell{
+    background:var(--ink-raised);
+    padding:26px 24px;
+  }
+  .skill-cell .cat{
+    font-family:var(--font-mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--slate-dim);
+    margin-bottom:14px;
+  }
+  .tag-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .tag{
+    font-family:var(--font-mono);
+    font-size:12px;
+    padding:5px 10px;
+    border-radius:5px;
+    background:var(--ink-line);
+    color:var(--paper);
+  }
+
+  /* ---------- PROJECTS ---------- */
+  .project{
+    display:grid;
+    grid-template-columns:80px 1fr;
+    gap:28px;
+    padding:36px 0;
+    border-bottom:1px solid var(--ink-line);
+    transition:background 0.2s;
+  }
+  .project:first-of-type{border-top:1px solid var(--ink-line);}
+  .project:hover{background:rgba(255,255,255,0.015);}
+
+  .project-tag{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--slate-dim);
+    padding-top:4px;
+  }
+  .project-main h3{
+    font-size:22px;
+    font-weight:600;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .metric-chip{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--signal-real);
+    background:var(--signal-real-dim);
+    padding:3px 9px;
+    border-radius:12px;
+    font-weight:500;
+  }
+  .project-stack{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--slate-dim);
+    margin-bottom:14px;
+  }
+  .project-main ul{
+    list-style:none;
+    color:var(--slate);
+    font-size:15px;
+    line-height:1.7;
+  }
+  .project-main ul li{
+    padding-left:18px;
+    position:relative;
+    margin-bottom:6px;
+  }
+  .project-main ul li::before{
+    content:'—';
+    position:absolute;
+    left:0;
+    color:var(--slate-dim);
+  }
+  .project-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:14px;
+    font-family:var(--font-mono);
+    font-size:13px;
+    color:var(--paper);
+    border-bottom:1px solid var(--ink-line);
+    padding-bottom:2px;
+    transition:border-color 0.2s, color 0.2s;
+  }
+  .project-link:hover{
+    color:var(--signal-real);
+    border-color:var(--signal-real);
+  }
+
+  /* ---------- CERTS ---------- */
+  .cert-list{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:14px;
+  }
+  @media (max-width:780px){
+    .cert-list{grid-template-columns:1fr;}
+  }
+  .cert-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 20px;
+    border:1px solid var(--ink-line);
+    border-radius:8px;
+    background:var(--ink-raised);
+  }
+  .cert-item .name{
+    font-size:14.5px;
+    color:var(--paper);
+  }
+  .cert-item .issuer{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--slate-dim);
+    margin-top:3px;
+  }
+  .cert-check{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--signal-real);
+    flex-shrink:0;
+    margin-left:14px;
+  }
+
+  /* ---------- CONTACT ---------- */
+  .contact{
+    text-align:center;
+  }
+  .contact h2{
+    font-size:clamp(32px, 6vw, 56px);
+    font-weight:600;
+    max-width:680px;
+    margin:0 auto;
+    line-height:1.15;
+  }
+  .contact h2 .accent{color:var(--signal-real);}
+  .contact-sub{
+    color:var(--slate);
+    margin-top:18px;
+    font-size:16px;
+  }
+  .contact-links{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+    margin-top:40px;
+    flex-wrap:wrap;
+  }
+
+  footer{
+    border-top:1px solid var(--ink-line);
+    padding:28px 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--slate-dim);
+    flex-wrap:wrap;
+    gap:10px;
+  }
+
+  .fade-up{
+    opacity:0;
+    transform:translateY(16px);
+    transition:opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-up.visible{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* ---------- EDUCATION TIMELINE ---------- */
+  .timeline{
+    position:relative;
+    padding-left:32px;
+    margin-top:8px;
+  }
+  .timeline::before{
+    content:'';
+    position:absolute;
+    left:5px; top:6px; bottom:6px;
+    width:1px;
+    background:var(--ink-line);
+  }
+  .tl-item{
+    position:relative;
+    padding-bottom:40px;
+  }
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-dot{
+    position:absolute;
+    left:-32px; top:4px;
+    width:11px; height:11px;
+    border-radius:50%;
+    background:var(--ink);
+    border:2px solid var(--signal-real);
+  }
+  .tl-item.past .tl-dot{
+    background:var(--signal-real);
+    border-color:var(--signal-real);
+  }
+  .tl-period{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--signal-real);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .tl-item h3{
+    font-size:18px;
+    font-weight:600;
+    margin-top:6px;
+  }
+  .tl-item .school{
+    color:var(--slate);
+    font-size:14px;
+    margin-top:3px;
+  }
+  .tl-item .score-pill{
+    display:inline-block;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--paper);
+    background:var(--ink-line);
+    padding:3px 10px;
+    border-radius:12px;
+    margin-top:10px;
+  }
+  .tl-detail{
+    margin-top:14px;
+    color:var(--slate);
+    font-size:14px;
+    line-height:1.7;
+  }
+  .tl-detail strong{color:var(--paper); font-weight:500;}
+  .coursework{
+    margin-top:12px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+  }
+  .coursework span{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--slate);
+    background:var(--ink-raised);
+    border:1px solid var(--ink-line);
+    padding:4px 9px;
+    border-radius:5px;
+  }
+  .achievement-box{
+    margin-top:16px;
+    border-left:2px solid var(--signal-real);
+    padding-left:14px;
+  }
+  .achievement-box .ach-label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--signal-real);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .achievement-box ul{
+    list-style:none;
+    margin-top:8px;
+    color:var(--slate);
+    font-size:14px;
+    line-height:1.6;
+  }
+  .achievement-box ul li{
+    padding-left:14px;
+    position:relative;
+    margin-bottom:5px;
+  }
+  .achievement-box ul li::before{
+    content:'+';
+    position:absolute;
+    left:0;
+    color:var(--signal-real);
+  }
+
+  /* ---------- PROJECT FILTERS ---------- */
+  .project-filters{
+    display:flex;
+    gap:10px;
+    margin-bottom:36px;
+    flex-wrap:wrap;
+  }
+  .filter-btn{
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    padding:8px 16px;
+    border-radius:20px;
+    border:1px solid var(--ink-line);
+    color:var(--slate);
+    background:transparent;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .filter-btn:hover{
+    border-color:var(--slate);
+    color:var(--paper);
+  }
+  .filter-btn.active{
+    background:var(--signal-real);
+    border-color:var(--signal-real);
+    color:var(--ink);
+    font-weight:500;
+  }
+
+  .project.hidden{display:none;}
+
+  .featured-star{
+    color:var(--signal-real);
+    font-size:13px;
+  }
+
+  /* ---------- PIPELINE (how it works) ---------- */
+  .pipeline-toggle{
+    margin-top:18px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--signal-real);
+    background:none;
+    border:none;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:0;
+  }
+  .pipeline-toggle .chevron{
+    display:inline-block;
+    transition:transform 0.25s ease;
+    font-size:10px;
+  }
+  .pipeline-toggle.open .chevron{
+    transform:rotate(90deg);
+  }
+  .pipeline{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.35s ease;
+  }
+  .pipeline.open{
+    max-height:600px;
+  }
+  .pipeline-steps{
+    display:flex;
+    gap:0;
+    margin-top:18px;
+    padding:20px;
+    background:var(--ink);
+    border:1px solid var(--ink-line);
+    border-radius:8px;
+    overflow-x:auto;
+  }
+  .pipe-step{
+    flex:1;
+    min-width:140px;
+    padding:0 16px;
+    position:relative;
+  }
+  .pipe-step:not(:last-child)::after{
+    content:'→';
+    position:absolute;
+    right:-4px;
+    top:2px;
+    color:var(--slate-dim);
+    font-family:var(--font-mono);
+  }
+  .pipe-step .step-num{
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:var(--signal-real);
+  }
+  .pipe-step h4{
+    font-size:13.5px;
+    font-weight:600;
+    margin-top:6px;
+    color:var(--paper);
+  }
+  .pipe-step p{
+    font-size:12px;
+    color:var(--slate-dim);
+    margin-top:5px;
+    line-height:1.5;
+  }
+  @media (max-width:780px){
+    .pipeline-steps{flex-direction:column; gap:18px;}
+    .pipe-step:not(:last-child)::after{display:none;}
+  }
+
+</style>
+</head>
+<body>
+
+<canvas id="signal-canvas" aria-hidden="true"></canvas>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span class="dot"></span> siya.sriswal()</div>
+    <div class="nav-links">
+      <a href="#about"><span class="num">01</span>About</a>
+      <a href="#skills"><span class="num">02</span>Skills</a>
+      <a href="#projects"><span class="num">03</span>Projects</a>
+      <a href="#certifications"><span class="num">04</span>Certs</a>
+      <a href="#contact"><span class="num">05</span>Contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="wrap">
+    <div class="eyebrow">AI &amp; Data Science · Dehradun, India</div>
+    <h1 class="title">Turning noisy data<br>into <span class="accent">confident decisions.</span></h1>
+    <p class="hero-sub">I'm Siya — an MCA (AI &amp; Data Science) student who builds classifiers for a living: telling fake news from real, healthy crops from diseased, positive sentiment from negative. <strong>98% accuracy on 44,000+ articles</strong> is the kind of number I like chasing.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#projects">View projects</a>
+      <a class="btn btn-ghost" href="#contact">Get in touch</a>
+    </div>
+
+    <div class="classifier">
+      <div class="classifier-head">
+        <span>fake_news_classifier.py — live demo</span>
+        <div class="traffic"><span></span><span></span><span></span></div>
+      </div>
+      <div class="classifier-body">
+        <label for="headline-input">Paste a headline, see it classified</label>
+        <textarea id="headline-input" rows="2" placeholder="e.g. Scientists confirm coffee cures all diseases overnight"></textarea>
+        <div class="classifier-result">
+          <div class="verdict idle" id="verdict">IDLE</div>
+          <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+          <div class="confidence-label" id="confidence-label">—</div>
+        </div>
+        <div class="classifier-hint">Toy heuristic for demo purposes — the real model runs on TF-IDF + Logistic Regression. <a href="#" id="demo-link" style="color:var(--signal-real); border-bottom:1px solid var(--signal-real-dim);">See the real project ↓</a></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-tag">01</span>
+      <h2>About</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="about-grid">
+      <div class="about-text fade-up">
+        <p>I'm currently pursuing my <strong>MCA in Artificial Intelligence &amp; Data Science</strong> at Graphic Era Hill University, Dehradun — after finishing my BCA there with an <strong>8.28 CGPA</strong>. Somewhere between those two degrees I got hooked on the moment a model goes from "guessing" to "knowing": watching a confusion matrix tighten, a loss curve flatten, an F1-score climb past 0.95.</p>
+        <p>My work so far spans the full classification stack — <strong>NLP</strong> (fake news, resumes, sentiment), <strong>computer vision</strong> (crop disease, handwritten digits), and <strong>regression/classical ML</strong> (house prices, churn, disease risk). I like projects that ship: a Streamlit app, a Flask or FastAPI backend, a React UI someone can actually click around in.</p>
+        <p>Outside of model training, I spend time on <strong>LeetCode</strong> sharpening data structures &amp; algorithms, and I'm comfortable across the standard ML/DL toolchain — from preprocessing in Pandas to deploying with Docker.</p>
+        <div class="stat-row">
+          <div class="stat">
+            <div class="num">9</div>
+            <div class="label">PROJECTS SHIPPED</div>
+          </div>
+          <div class="stat">
+            <div class="num">98%+</div>
+            <div class="label">TOP MODEL ACCURACY</div>
+          </div>
+          <div class="stat">
+            <div class="num">44K+</div>
+            <div class="label">ARTICLES PROCESSED</div>
+          </div>
+          <div class="stat">
+            <div class="num">96%</div>
+            <div class="label">CNN VISION ACCURACY</div>
+          </div>
+        </div>
+      </div>
+      <div class="fade-up">
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-period">2025 — 2027</div>
+            <h3>MCA, Artificial Intelligence &amp; Data Science</h3>
+            <div class="school">Graphic Era Hill University, Dehradun</div>
+            <span class="score-pill">STATUS: PURSUING</span>
+            <div class="tl-detail">Going deeper into the theory behind the models I'd already been building hands-on — <strong>advanced ML algorithms, deep learning architectures, and applied statistics</strong> for data-driven systems.</div>
+            <div class="coursework">
+              <span>Advanced Machine Learning</span>
+              <span>Deep Learning</span>
+              <span>Big Data Analytics</span>
+              <span>Natural Language Processing</span>
+              <span>Computer Vision</span>
+              <span>Statistical Methods</span>
+              <span>Cloud Computing</span>
+            </div>
+          </div>
+
+          <div class="tl-item past">
+            <div class="tl-dot"></div>
+            <div class="tl-period">2022 — 2025</div>
+            <h3>Bachelor of Computer Applications (BCA)</h3>
+            <div class="school">Graphic Era Hill University, Dehradun</div>
+            <span class="score-pill">CGPA: 8.28 / 10.0</span>
+            <div class="tl-detail">Built the <strong>core CS foundation</strong> — data structures, algorithms, databases, and systems — that every model I've shipped since has sat on top of.</div>
+            <div class="coursework">
+              <span>Data Structures &amp; Algorithms</span>
+              <span>OOP</span>
+              <span>DBMS</span>
+              <span>Operating Systems</span>
+              <span>Computer Networks</span>
+              <span>Python Programming</span>
+              <span>Web Technologies</span>
+            </div>
+            <div class="achievement-box">
+              <div class="ach-label">Highlights</div>
+              <ul>
+                <li>Graduated with 8.28 CGPA, consistently placing in the top band of the cohort</li>
+                <li>Built first ML projects (Fake News Detection, Sentiment Analysis) during final year</li>
+                <li>Active on LeetCode, sharpening DSA fundamentals alongside coursework</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-tag">02</span>
+      <h2>Skills</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="skills-grid fade-up">
+      <div class="skill-cell">
+        <div class="cat">Languages</div>
+        <div class="tag-row">
+          <span class="tag">Python</span><span class="tag">SQL</span><span class="tag">C++ / C</span>
+        </div>
+      </div>
+      <div class="skill-cell">
+        <div class="cat">Data Science &amp; ML</div>
+        <div class="tag-row">
+          <span class="tag">NumPy</span><span class="tag">Pandas</span><span class="tag">Matplotlib</span><span class="tag">Seaborn</span><span class="tag">Scikit-learn</span><span class="tag">EDA</span><span class="tag">Feature Engineering</span><span class="tag">Model Evaluation</span>
+        </div>
+      </div>
+      <div class="skill-cell">
+        <div class="cat">Deep Learning &amp; AI</div>
+        <div class="tag-row">
+          <span class="tag">TensorFlow</span><span class="tag">Keras</span><span class="tag">PyTorch</span><span class="tag">CNN</span><span class="tag">RNN / LSTM</span><span class="tag">NLP</span><span class="tag">Transformers</span>
+        </div>
+      </div>
+      <div class="skill-cell">
+        <div class="cat">Databases</div>
+        <div class="tag-row">
+          <span class="tag">MySQL</span>
+        </div>
+      </div>
+      <div class="skill-cell">
+        <div class="cat">Tools &amp; Platforms</div>
+        <div class="tag-row">
+          <span class="tag">Git</span><span class="tag">GitHub</span><span class="tag">Docker</span><span class="tag">Jupyter</span><span class="tag">Colab</span><span class="tag">VS Code</span><span class="tag">Linux</span>
+        </div>
+      </div>
+      <div class="skill-cell">
+        <div class="cat">Core CS</div>
+        <div class="tag-row">
+          <span class="tag">DSA</span><span class="tag">OOP</span><span class="tag">DBMS</span><span class="tag">OS</span><span class="tag">Networks</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-tag">03</span>
+      <h2>Projects</h2>
+      <div class="rule"></div>
+    </div>
+
+    <div class="project-filters fade-up">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="nlp">NLP</button>
+      <button class="filter-btn" data-filter="cv">Computer Vision</button>
+      <button class="filter-btn" data-filter="ml">ML / Regression</button>
+    </div>
+
+    <div class="project fade-up" data-cat="nlp">
+      <div class="project-tag">NLP / 01</div>
+      <div class="project-main">
+        <h3>Fake News Detection <span class="featured-star">★</span> <span class="metric-chip">98%+ accuracy</span></h3>
+        <div class="project-stack">Python · Pandas · Scikit-learn · TF-IDF · Logistic Regression · Naive Bayes · Streamlit</div>
+        <ul>
+          <li>Built an NLP system classifying news articles as real or fake using TF-IDF vectorization and Logistic Regression</li>
+          <li>Cleaned, tokenized, and feature-engineered text across 44,000+ news articles</li>
+          <li>Compared Logistic Regression against Naive Bayes, evaluated with accuracy, precision, recall, and F1-score</li>
+          <li>Shipped a Streamlit app for real-time predictions with a simple, usable interface</li>
+        </ul>
+        <button class="pipeline-toggle" data-target="pipe-fakenews"><span class="chevron">▸</span> How it works</button>
+        <div class="pipeline" id="pipe-fakenews">
+          <div class="pipeline-steps">
+            <div class="pipe-step"><div class="step-num">01</div><h4>Raw articles</h4><p>44,000+ labeled news articles ingested as the training corpus</p></div>
+            <div class="pipe-step"><div class="step-num">02</div><h4>Clean &amp; tokenize</h4><p>Strip noise, lowercase, remove stop words, tokenize text</p></div>
+            <div class="pipe-step"><div class="step-num">03</div><h4>TF-IDF vectorize</h4><p>Convert tokens into weighted term-frequency feature vectors</p></div>
+            <div class="pipe-step"><div class="step-num">04</div><h4>Train classifier</h4><p>Fit Logistic Regression and Naive Bayes, compare performance</p></div>
+            <div class="pipe-step"><div class="step-num">05</div><h4>Serve via Streamlit</h4><p>Real-time prediction UI for any pasted headline</p></div>
+          </div>
+        </div>
+        <a class="project-link" href="https://github.com/siyasriswal" target="_blank" rel="noopener">View on GitHub →</a>
+      </div>
+    </div>
+
+    <div class="project fade-up" data-cat="nlp">
+      <div class="project-tag">NLP / 02</div>
+      <div class="project-main">
+        <h3>Resume Screening System <span class="featured-star">★★★</span></h3>
+        <div class="project-stack">Python · Scikit-learn · TF-IDF · Cosine Similarity · Streamlit</div>
+        <ul>
+          <li>Built an AI tool that automatically ranks resumes against a given job description</li>
+          <li>Applied NLP preprocessing and TF-IDF vectorization to both resumes and job descriptions</li>
+          <li>Scored relevance using cosine similarity between resume and job-description vectors</li>
+          <li>Built an interactive Streamlit web app so recruiters can upload resumes and get ranked results instantly</li>
+        </ul>
+        <button class="pipeline-toggle" data-target="pipe-resume"><span class="chevron">▸</span> How it works</button>
+        <div class="pipeline" id="pipe-resume">
+          <div class="pipeline-steps">
+            <div class="pipe-step"><div class="step-num">01</div><h4>Upload inputs</h4><p>Recruiter uploads a job description and a batch of resumes</p></div>
+            <div class="pipe-step"><div class="step-num">02</div><h4>NLP preprocessing</h4><p>Clean and tokenize text from both resumes and job description</p></div>
+            <div class="pipe-step"><div class="step-num">03</div><h4>Vectorize</h4><p>TF-IDF transforms each document into a comparable vector</p></div>
+            <div class="pipe-step"><div class="step-num">04</div><h4>Score similarity</h4><p>Cosine similarity ranks each resume's relevance to the role</p></div>
+            <div class="pipe-step"><div class="step-num">05</div><h4>Ranked output</h4><p>Streamlit UI surfaces the best-matched resumes first</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="project fade-up" data-cat="nlp">
+      <div class="project-tag">NLP / 03</div>
+      <div class="project-main">
+        <h3>Sentiment Analysis on Tweets &amp; Reviews <span class="metric-chip">85% accuracy</span></h3>
+        <div class="project-stack">Python · NLTK · Scikit-learn · TF-IDF</div>
+        <ul>
+          <li>Preprocessed tweet and customer review text with tokenization, stop-word removal, and TF-IDF vectorization</li>
+          <li>Trained a sentiment classifier distinguishing positive from negative text, reaching 85% accuracy on Twitter data</li>
+          <li>Compared multiple ML classifiers to pick the strongest performer</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="project fade-up" data-cat="cv">
+      <div class="project-tag">CV / 04</div>
+      <div class="project-main">
+        <h3>Potato Disease Classification Web App <span class="metric-chip">96% accuracy</span></h3>
+        <div class="project-stack">React.js · FastAPI · TensorFlow · Keras · NumPy</div>
+        <ul>
+          <li>Built a CNN to classify potato leaf disease — Early Blight, Late Blight, or Healthy — from an image</li>
+          <li>Reached 96% accuracy on the held-out test set</li>
+          <li>Connected a FastAPI backend to a React.js front end for a complete, usable app</li>
+        </ul>
+        <button class="pipeline-toggle" data-target="pipe-potato"><span class="chevron">▸</span> How it works</button>
+        <div class="pipeline" id="pipe-potato">
+          <div class="pipeline-steps">
+            <div class="pipe-step"><div class="step-num">01</div><h4>Leaf image</h4><p>User uploads a photo of a potato leaf via the React UI</p></div>
+            <div class="pipe-step"><div class="step-num">02</div><h4>Preprocess</h4><p>Resize and normalize the image for the CNN</p></div>
+            <div class="pipe-step"><div class="step-num">03</div><h4>CNN inference</h4><p>TensorFlow/Keras model predicts one of three classes</p></div>
+            <div class="pipe-step"><div class="step-num">04</div><h4>FastAPI response</h4><p>Backend returns the predicted label and confidence</p></div>
+            <div class="pipe-step"><div class="step-num">05</div><h4>Result shown</h4><p>React UI displays Early Blight / Late Blight / Healthy</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="project fade-up" data-cat="cv">
+      <div class="project-tag">CV / 05</div>
+      <div class="project-main">
+        <h3>Handwritten Digit Recognition <span class="metric-chip">98%+ accuracy</span></h3>
+        <div class="project-stack">Python · TensorFlow · Keras</div>
+        <ul>
+          <li>Implemented a CNN trained on the MNIST handwritten digit dataset</li>
+          <li>Applied image preprocessing and normalization before training</li>
+          <li>Reached over 98% test accuracy</li>
+          <li>Visualized predictions and training performance curves</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="project fade-up" data-cat="ml">
+      <div class="project-tag">ML / 06</div>
+      <div class="project-main">
+        <h3>House Price Prediction</h3>
+        <div class="project-stack">Python · Pandas · NumPy · Scikit-learn · XGBoost · Matplotlib</div>
+        <ul>
+          <li>Built a regression model to predict house prices from historical housing data</li>
+          <li>Performed data cleaning, feature engineering, and exploratory data analysis (EDA)</li>
+          <li>Compared Linear Regression, Random Forest, and XGBoost</li>
+          <li>Tuned hyperparameters with cross-validation to improve prediction accuracy</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="project fade-up" data-cat="ml">
+      <div class="project-tag">ML / 07</div>
+      <div class="project-main">
+        <h3>Customer Churn Prediction</h3>
+        <div class="project-stack">Python · Scikit-learn · Pandas</div>
+        <ul>
+          <li>Developed a classification model to predict which customers are likely to churn</li>
+          <li>Handled missing values, encoded categorical features, and balanced the dataset</li>
+          <li>Evaluated models using Accuracy, Precision, Recall, F1-score, and ROC-AUC</li>
+          <li>Identified the key factors most strongly linked to customer retention</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="project fade-up" data-cat="ml">
+      <div class="project-tag">ML / 08</div>
+      <div class="project-main">
+        <h3>Movie Recommendation System <span class="featured-star">★</span></h3>
+        <div class="project-stack">Python · Pandas · Scikit-learn · Cosine Similarity</div>
+        <ul>
+          <li>Built a content-based recommendation engine using cosine similarity between movie feature vectors</li>
+          <li>Processed and engineered features from movie metadata (genre, cast, keywords)</li>
+          <li>Improved recommendation relevance through iterative feature engineering</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="project fade-up" data-cat="ml">
+      <div class="project-tag">ML / 09</div>
+      <div class="project-main">
+        <h3>Medical Disease Prediction</h3>
+        <div class="project-stack">Python · Scikit-learn · Flask</div>
+        <ul>
+          <li>Predicted likely diseases from patient-reported symptoms</li>
+          <li>Compared Decision Tree, Random Forest, and SVM classifiers</li>
+          <li>Built a Flask web interface for real-time predictions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="certifications">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-tag">04</span>
+      <h2>Certifications</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="cert-list fade-up">
+      <div class="cert-item">
+        <div><div class="name">Introduction to Data Analytics</div><div class="issuer">Coursera</div></div>
+        <div class="cert-check">VERIFIED ✓</div>
+      </div>
+      <div class="cert-item">
+        <div><div class="name">The Structured Query Language (SQL)</div><div class="issuer">Coursera</div></div>
+        <div class="cert-check">VERIFIED ✓</div>
+      </div>
+      <div class="cert-item">
+        <div><div class="name">Introduction to Machine Learning</div><div class="issuer">Coursera</div></div>
+        <div class="cert-check">VERIFIED ✓</div>
+      </div>
+      <div class="cert-item">
+        <div><div class="name">Python for Data Science, AI &amp; Development</div><div class="issuer">Coursera</div></div>
+        <div class="cert-check">VERIFIED ✓</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <div class="wrap">
+    <h2>Got a dataset that needs<br><span class="accent">a decision made?</span></h2>
+    <p class="contact-sub">Open to internships, research collaborations, and ML/DS roles.</p>
+    <div class="contact-links">
+      <a class="btn btn-primary" href="mailto:siyasriswal125@gmail.com">Email me</a>
+      <a class="btn btn-ghost" href="https://linkedin.com/in/siya-sriswal" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn btn-ghost" href="https://github.com/siyasriswal" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn btn-ghost" href="https://leetcode.com/u/siyasriswal" target="_blank" rel="noopener">LeetCode</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%; flex-wrap:wrap; gap:10px;">
+    <span>© 2026 Siya Sriswal</span>
+    <span>Dehradun, Uttarakhand, India</span>
+    <span>+91-8384854729</span>
+  </div>
+</footer>
+
+<script>
+  // Toy fake-news classifier heuristic for the hero demo
+  const fakeSignals = ['miracle','cure','shocking','secret','you won\'t believe','overnight','100%','aliens','conspiracy','banned','doctors hate','instantly','everyone is saying','breaking: scientists confirm'];
+  const realSignals = ['according to','reported by','officials said','study found','data shows','percent','government','announced','confirmed by','university','research','statistics'];
+
+  const input = document.getElementById('headline-input');
+  const verdict = document.getElementById('verdict');
+  const barFill = document.getElementById('bar-fill');
+  const confLabel = document.getElementById('confidence-label');
+
+  function classify(text){
+    const t = text.toLowerCase();
+    let score = 0.5;
+    fakeSignals.forEach(s => { if(t.includes(s)) score -= 0.11; });
+    realSignals.forEach(s => { if(t.includes(s)) score += 0.09; });
+    if (t.includes('!')) score -= 0.05;
+    const exclaims = (t.match(/!/g) || []).length;
+    score -= exclaims * 0.03;
+    score = Math.max(0.04, Math.min(0.97, score + (Math.sin(t.length) * 0.02)));
+    return score; // probability "real"
+  }
+
+  let debounceTimer;
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const text = input.value.trim();
+    if (text.length < 4){
+      verdict.textContent = 'IDLE';
+      verdict.className = 'verdict idle';
+      barFill.style.width = '50%';
+      barFill.style.background = 'var(--slate-dim)';
+      confLabel.textContent = '—';
+      return;
+    }
+    debounceTimer = setTimeout(() => {
+      const pReal = classify(text);
+      const isReal = pReal >= 0.5;
+      const confidence = isReal ? pReal : (1 - pReal);
+      verdict.textContent = isReal ? 'REAL' : 'FAKE';
+      verdict.className = 'verdict ' + (isReal ? 'real' : 'fake');
+      barFill.style.width = (confidence * 100).toFixed(0) + '%';
+      barFill.style.background = isReal ? 'var(--signal-real)' : 'var(--signal-fake)';
+      confLabel.textContent = (confidence * 100).toFixed(0) + '%';
+    }, 180);
+  });
+
+  document.getElementById('demo-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('projects').scrollIntoView({behavior:'smooth'});
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold: 0.12});
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Project category filters
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const projects = document.querySelectorAll('.project');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      projects.forEach(p => {
+        if (filter === 'all' || p.dataset.cat === filter){
+          p.classList.remove('hidden');
+        } else {
+          p.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  // Pipeline "how it works" accordions
+  document.querySelectorAll('.pipeline-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      const isOpen = target.classList.toggle('open');
+      btn.classList.toggle('open', isOpen);
+      btn.innerHTML = '<span class="chevron">▸</span> ' + (isOpen ? 'Hide details' : 'How it works');
+    });
+  });
+
+  // ---------- Ambient scroll animation: data points "getting classified" ----------
+  (function(){
+    const canvas = document.getElementById('signal-canvas');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!canvas || reduceMotion) return;
+
+    const ctx = canvas.getContext('2d');
+    let w = window.innerWidth, h = window.innerHeight;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    function resize(){
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const COLOR_NEUTRAL = '138, 143, 152';
+    const COLOR_REAL = '77, 124, 255';
+    const COLOR_FAKE = '255, 107, 92';
+
+    const RESOLVE_Y_RATIO = 0.32; // where in the viewport a particle "resolves"
+    const PARTICLE_COUNT = Math.round(Math.min(46, Math.max(22, w / 32)));
+
+    function makeParticle(spawnAbove){
+      const r = Math.random();
+      return {
+        x: Math.random() * w,
+        y: spawnAbove ? -Math.random() * h * 0.4 : Math.random() * h,
+        baseSpeed: 0.22 + Math.random() * 0.32,
+        drift: (Math.random() - 0.5) * 0.18,
+        size: 1.4 + Math.random() * 1.8,
+        resolved: false,
+        outcome: r > 0.52 ? 'real' : 'fake', // slightly more "real" than "fake", like her 98% model
+        resolveProgress: 0,
+        phase: Math.random() * Math.PI * 2,
+        opacity: 0.0,
+        targetOpacity: 0.35 + Math.random() * 0.35
+      };
+    }
+
+    const particles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++){
+      particles.push(makeParticle(false));
+    }
+
+    let scrollVel = 0;
+    let lastScrollY = window.scrollY;
+    let lastTime = performance.now();
+
+    window.addEventListener('scroll', () => {
+      const sy = window.scrollY;
+      scrollVel = sy - lastScrollY;
+      lastScrollY = sy;
+    }, {passive:true});
+
+    function step(now){
+      const dt = Math.min(32, now - lastTime) / 16.67; // normalize to ~60fps units
+      lastTime = now;
+
+      // scroll velocity decays back to 0 each frame
+      scrollVel *= 0.9;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const resolveY = h * RESOLVE_Y_RATIO;
+
+      particles.forEach(p => {
+        // fade in
+        if (p.opacity < p.targetOpacity){
+          p.opacity = Math.min(p.targetOpacity, p.opacity + 0.01 * dt);
+        }
+
+        // gentle horizontal drift, sinusoidal wobble
+        p.phase += 0.006 * dt;
+        const wobble = Math.sin(p.phase) * 0.25;
+
+        // base downward drift + scroll-driven extra speed (scrolling down = particles flow faster downward)
+        const speed = p.baseSpeed + Math.abs(scrollVel) * 0.035;
+        p.y += speed * dt + scrollVel * 0.06;
+        p.x += (p.drift + wobble * 0.08) * dt;
+
+        // resolve once crossing the resolve line, moving downward
+        if (!p.resolved && p.y > resolveY){
+          p.resolved = true;
+        }
+        if (p.resolved && p.resolveProgress < 1){
+          p.resolveProgress = Math.min(1, p.resolveProgress + 0.045 * dt);
+        }
+
+        // recycle when off bottom or off sides
+        if (p.y > h + 20 || p.x < -20 || p.x > w + 20){
+          Object.assign(p, makeParticle(true));
+          p.y = -10;
+        }
+
+        // color interpolation: neutral -> real or fake as it resolves
+        const targetColor = p.outcome === 'real' ? COLOR_REAL : COLOR_FAKE;
+        const mix = p.resolveProgress;
+        const col = mixRgb(COLOR_NEUTRAL, targetColor, mix);
+
+        const glow = p.resolved ? (1 - p.resolveProgress) * 6 : 0;
+        const radius = p.size + (p.resolved ? p.resolveProgress * 0.6 : 0);
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${col}, ${p.opacity})`;
+        if (glow > 0.1){
+          ctx.shadowColor = `rgba(${targetColor}, 0.6)`;
+          ctx.shadowBlur = glow;
+        } else {
+          ctx.shadowBlur = 0;
+        }
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      requestAnimationFrame(step);
+    }
+
+    function mixRgb(aStr, bStr, t){
+      const a = aStr.split(',').map(Number);
+      const b = bStr.split(',').map(Number);
+      const r = Math.round(a[0] + (b[0]-a[0]) * t);
+      const g = Math.round(a[1] + (b[1]-a[1]) * t);
+      const bl = Math.round(a[2] + (b[2]-a[2]) * t);
+      return `${r}, ${g}, ${bl}`;
+    }
+
+    requestAnimationFrame(step);
+  })();
+</script>
+
+</body>
+</html>
